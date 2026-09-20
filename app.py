@@ -134,6 +134,22 @@ def cetak_sertifikat(pelatihan_id):
         mimetype='application/pdf'
     )
 
+@app.route('/peserta/<int:peserta_id>/cetak_sertifikat')
+def cetak_sertifikat_peserta(peserta_id):
+    peserta = Peserta.query.get_or_404(peserta_id)
+    pelatihan = Pelatihan.query.get(peserta.pelatihan_id)
+    template_path = 'static/templates/sertifikat_template.jpg'
+    if not os.path.exists(template_path):
+        template_path = None
+    
+    pdf_buffer = generate_sertifikat_pdf(pelatihan, template_path, peserta_id=peserta.id)
+    return send_file(
+        pdf_buffer,
+        as_attachment=True,
+        download_name=f"Sertifikat_{peserta.nama_peserta.replace(' ', '_')}.pdf",
+        mimetype='application/pdf'
+    )
+
 @app.route('/pelatihan/<int:pelatihan_id>/cetak_sk')
 def cetak_sk(pelatihan_id):
     pelatihan = Pelatihan.query.get_or_404(pelatihan_id)

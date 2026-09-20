@@ -54,6 +54,7 @@
                         <td>{{ p.perusahaan or '-' }}</td>
                         <td>
                             <a href="{{ url_for('edit_peserta', peserta_id=p.id) }}" class="btn btn-secondary btn-sm" style="background: #F59E0B; color: white; border: none; padding: 0.2rem 0.5rem; font-size: 0.8rem;">Edit</a>
+                            <a href="{{ url_for('cetak_sertifikat_peserta', peserta_id=p.id) }}" class="btn btn-primary btn-sm" style="background: #10B981; color: white; border: none; padding: 0.2rem 0.5rem; font-size: 0.8rem; margin-left: 0.25rem;">Cetak</a>
                         </td>
                     </tr>
                     {% else %}

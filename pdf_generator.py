@@ -5,16 +5,21 @@ from reportlab.lib.units import inch
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 
-def generate_sertifikat_pdf(pelatihan, template_path=None):
+def generate_sertifikat_pdf(pelatihan, template_path=None, peserta_id=None):
     """
-    Generate PDF Sertifikat for all participants in a batch.
+    Generate PDF Sertifikat for all participants or a specific one, with syllabus page.
     """
     buffer = BytesIO()
     # Certificate is usually landscape
     c = canvas.Canvas(buffer, pagesize=landscape(A4))
     width, height = landscape(A4)
     
-    for peserta in pelatihan.peserta:
+    if peserta_id:
+        peserta_list = [p for p in pelatihan.peserta if p.id == peserta_id]
+    else:
+        peserta_list = pelatihan.peserta
+        
+    for peserta in peserta_list:
         # 1. Draw Template (if provided)
         if template_path and os.path.exists(template_path):
             try:
@@ -86,6 +91,32 @@ def generate_sertifikat_pdf(pelatihan, template_path=None):
         
         # Add page for next participant
         c.showPage()
+        
+        # 4. Add Syllabus Page (Halaman 2)
+        logo_path = 'static/templates/logo-fjm.jpg'
+        if os.path.exists(logo_path):
+            c.drawImage(logo_path, width - 150, height - 100, width=100, height=100, preserveAspectRatio=True, mask='auto')
+            
+        c.setFont("Helvetica-Bold", 16)
+        c.drawString(100, height - 100, pelatihan.judul_pelatihan)
+        
+        c.setFont("Helvetica-Bold", 14)
+        c.drawString(100, height - 130, "TRAINING OUTLINE:")
+        # Underline
+        c.line(100, height - 132, 250, height - 132)
+        
+        c.setFont("Helvetica", 12)
+        y_pos = height - 160
+        if pelatihan.silabus:
+            for line in pelatihan.silabus.split('\n'):
+                line = line.strip()
+                if line:
+                    c.drawString(100, y_pos, line)
+                    y_pos -= 20
+        else:
+            c.drawString(100, y_pos, "(Tidak ada silabus yang diisi)")
+            
+        c.showPage() # End of syllabus page
         
     c.save()
     buffer.seek(0)
