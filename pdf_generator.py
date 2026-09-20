@@ -19,6 +19,11 @@ def generate_sertifikat_pdf(pelatihan, template_path=None, peserta_id=None):
     else:
         peserta_list = pelatihan.peserta
         
+    if not peserta_list:
+        c.setFont("Helvetica", 16)
+        c.drawString(100, height / 2.0, "Belum ada peserta untuk dicetak.")
+        c.showPage()
+        
     for peserta in peserta_list:
         # 1. Draw Template (if provided)
         if template_path and os.path.exists(template_path):
