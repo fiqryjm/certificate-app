@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
-{% block title %}Tambah Pelatihan - Sertifikat Manager{% endblock %}
+{% block title %}{{ 'Edit' if pelatihan else 'Tambah' }} Pelatihan - Sertifikat Manager{% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h1 class="page-title">Tambah Pelatihan Baru</h1>
+    <h1 class="page-title">{{ 'Edit' if pelatihan else 'Tambah' }} Pelatihan</h1>
     <a href="{{ url_for('index') }}" class="btn btn-secondary">Kembali</a>
 </div>
 
@@ -11,28 +11,28 @@
     <form method="POST">
         <div class="form-group">
             <label class="form-label" for="judul_pelatihan">Judul Pelatihan</label>
-            <input type="text" class="form-control" id="judul_pelatihan" name="judul_pelatihan" required placeholder="Contoh: Basic Drilling">
+            <input type="text" class="form-control" id="judul_pelatihan" name="judul_pelatihan" required placeholder="Contoh: Basic Drilling" value="{{ pelatihan.judul_pelatihan if pelatihan else '' }}">
         </div>
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
             <div class="form-group">
                 <label class="form-label" for="tempat">Tempat Pelatihan</label>
-                <input type="text" class="form-control" id="tempat" name="tempat" required>
+                <input type="text" class="form-control" id="tempat" name="tempat" required value="{{ pelatihan.tempat if pelatihan else '' }}">
             </div>
             <div class="form-group">
                 <label class="form-label" for="nama_instruktur">Nama Instruktur</label>
-                <input type="text" class="form-control" id="nama_instruktur" name="nama_instruktur" required>
+                <input type="text" class="form-control" id="nama_instruktur" name="nama_instruktur" required value="{{ pelatihan.nama_instruktur if pelatihan else '' }}">
             </div>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
             <div class="form-group">
                 <label class="form-label" for="tanggal_mulai">Tanggal Mulai</label>
-                <input type="date" class="form-control" id="tanggal_mulai" name="tanggal_mulai" required>
+                <input type="date" class="form-control" id="tanggal_mulai" name="tanggal_mulai" required value="{{ pelatihan.tanggal_mulai.strftime('%Y-%m-%d') if pelatihan else '' }}">
             </div>
             <div class="form-group">
                 <label class="form-label" for="tanggal_selesai">Tanggal Selesai</label>
-                <input type="date" class="form-control" id="tanggal_selesai" name="tanggal_selesai" required>
+                <input type="date" class="form-control" id="tanggal_selesai" name="tanggal_selesai" required value="{{ pelatihan.tanggal_selesai.strftime('%Y-%m-%d') if pelatihan else '' }}">
             </div>
         </div>
 
@@ -41,26 +41,26 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
             <div class="form-group">
                 <label class="form-label" for="no_sertifikat">Nomor Sertifikat</label>
-                <input type="text" class="form-control" id="no_sertifikat" name="no_sertifikat" required placeholder="FJM/123/2025">
+                <input type="text" class="form-control" id="no_sertifikat" name="no_sertifikat" required placeholder="FJM/123/2025" value="{{ pelatihan.no_sertifikat if pelatihan else '' }}">
             </div>
             <div class="form-group">
                 <label class="form-label" for="no_sk">Nomor SK Direksi</label>
-                <input type="text" class="form-control" id="no_sk" name="no_sk" required placeholder="SK/001/2025">
+                <input type="text" class="form-control" id="no_sk" name="no_sk" required placeholder="SK/001/2025" value="{{ pelatihan.no_sk if pelatihan else '' }}">
             </div>
         </div>
 
         <div class="form-group">
             <label class="form-label" for="tanggal_sk">Tanggal SK Dikeluarkan</label>
-            <input type="date" class="form-control" id="tanggal_sk" name="tanggal_sk" required>
+            <input type="date" class="form-control" id="tanggal_sk" name="tanggal_sk" required value="{{ pelatihan.tanggal_sk.strftime('%Y-%m-%d') if pelatihan else '' }}">
         </div>
 
         <div class="form-group">
             <label class="form-label" for="silabus">Silabus / Materi (Opsional)</label>
-            <textarea class="form-control" id="silabus" name="silabus" rows="4"></textarea>
+            <textarea class="form-control" id="silabus" name="silabus" rows="4">{{ pelatihan.silabus if pelatihan else '' }}</textarea>
         </div>
 
         <div style="margin-top: 2rem;">
-            <button type="submit" class="btn btn-primary" style="width: 100%;">Simpan dan Buat QR Code</button>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">{{ 'Simpan Perubahan' if pelatihan else 'Simpan dan Buat QR Code' }}</button>
         </div>
     </form>
 </div>

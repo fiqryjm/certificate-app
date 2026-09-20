@@ -70,6 +70,25 @@ def tambah_pelatihan():
         
     return render_template('form_pelatihan.html')
 
+@app.route('/pelatihan/<int:pelatihan_id>/edit', methods=['GET', 'POST'])
+def edit_pelatihan(pelatihan_id):
+    pelatihan = Pelatihan.query.get_or_404(pelatihan_id)
+    if request.method == 'POST':
+        pelatihan.judul_pelatihan = request.form.get('judul_pelatihan')
+        pelatihan.tempat = request.form.get('tempat')
+        pelatihan.tanggal_mulai = datetime.strptime(request.form.get('tanggal_mulai'), '%Y-%m-%d').date()
+        pelatihan.tanggal_selesai = datetime.strptime(request.form.get('tanggal_selesai'), '%Y-%m-%d').date()
+        pelatihan.nama_instruktur = request.form.get('nama_instruktur')
+        pelatihan.no_sertifikat = request.form.get('no_sertifikat')
+        pelatihan.no_sk = request.form.get('no_sk')
+        pelatihan.tanggal_sk = datetime.strptime(request.form.get('tanggal_sk'), '%Y-%m-%d').date()
+        pelatihan.silabus = request.form.get('silabus')
+        
+        db.session.commit()
+        return redirect(url_for('index'))
+        
+    return render_template('form_pelatihan.html', pelatihan=pelatihan)
+
 @app.route('/pelatihan/<int:pelatihan_id>/peserta', methods=['GET', 'POST'])
 def peserta(pelatihan_id):
     pelatihan = Pelatihan.query.get_or_404(pelatihan_id)
@@ -85,6 +104,19 @@ def peserta(pelatihan_id):
         
     peserta_list = Peserta.query.filter_by(pelatihan_id=pelatihan.id).all()
     return render_template('peserta.html', pelatihan=pelatihan, peserta_list=peserta_list)
+
+@app.route('/peserta/<int:peserta_id>/edit', methods=['GET', 'POST'])
+def edit_peserta(peserta_id):
+    peserta = Peserta.query.get_or_404(peserta_id)
+    if request.method == 'POST':
+        peserta.nama_peserta = request.form.get('nama_peserta')
+        peserta.perusahaan = request.form.get('perusahaan')
+        peserta.keterangan = request.form.get('keterangan')
+        
+        db.session.commit()
+        return redirect(url_for('peserta', pelatihan_id=peserta.pelatihan_id))
+        
+    return render_template('edit_peserta.html', peserta=peserta)
 
 @app.route('/pelatihan/<int:pelatihan_id>/cetak_sertifikat')
 def cetak_sertifikat(pelatihan_id):

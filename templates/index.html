@@ -26,11 +26,14 @@
                         <small class="text-muted" style="color: #6B7280;">Instruktur: {{ pelatihan.nama_instruktur }}</small>
                     </td>
                     <td>{{ pelatihan.tanggal_mulai.strftime('%d %b %Y') }}</td>
-                    <td><span class="badge">{{ pelatihan.no_sertifikat }}</span></td>
+                    <td style="white-space: nowrap;"><span class="badge">{{ pelatihan.no_sertifikat }}</span></td>
                     <td>
-                        <a href="{{ url_for('peserta', pelatihan_id=pelatihan.id) }}" class="btn btn-secondary btn-sm" style="margin-right: 0.5rem;">Kelola Peserta</a>
-                        <a href="{{ url_for('cetak_sertifikat', pelatihan_id=pelatihan.id) }}" class="btn btn-primary btn-sm" style="margin-right: 0.5rem; background: #10B981; box-shadow: none;">PDF Sertifikat</a>
-                        <a href="{{ url_for('cetak_sk', pelatihan_id=pelatihan.id) }}" class="btn btn-primary btn-sm" style="background: #3B82F6; box-shadow: none;">PDF SK</a>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <a href="{{ url_for('edit_pelatihan', pelatihan_id=pelatihan.id) }}" class="btn btn-secondary btn-sm" style="background: #6B7280; color: white; border: none;">Edit</a>
+                            <a href="{{ url_for('peserta', pelatihan_id=pelatihan.id) }}" class="btn btn-secondary btn-sm" style="border: 1px solid var(--border);">Kelola Peserta</a>
+                            <a href="{{ url_for('cetak_sertifikat', pelatihan_id=pelatihan.id) }}" class="btn btn-primary btn-sm" style="background: #10B981; box-shadow: none;">PDF Sertifikat</a>
+                            <a href="{{ url_for('cetak_sk', pelatihan_id=pelatihan.id) }}" class="btn btn-primary btn-sm" style="background: #3B82F6; box-shadow: none;">PDF SK</a>
+                        </div>
                     </td>
                 </tr>
                 {% else %}

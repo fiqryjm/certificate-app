@@ -144,7 +144,11 @@ def generate_sk_direksi_pdf(pelatihan, template_path=None):
     
     y_pos -= 20
     
-    text2 = "Peserta yang lulus berhak mendapatkan sertifikat dengan jumlah JP (...) jam sesuai struktur program yang dipersyaratkan. Lampiran surat ini merupakan satu kesatuan yang tidak terpisahkan dari Surat Keterangan ini. Demikian Surat Keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya."
+    # Menghitung JP (Jumlah Hari x 6)
+    jumlah_hari = (pelatihan.tanggal_selesai - pelatihan.tanggal_mulai).days + 1
+    jumlah_jp = jumlah_hari * 6
+    
+    text2 = f"Peserta yang lulus berhak mendapatkan sertifikat dengan jumlah JP ({jumlah_jp}) jam sesuai struktur program yang dipersyaratkan. Lampiran surat ini merupakan satu kesatuan yang tidak terpisahkan dari Surat Keterangan ini. Demikian Surat Keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya."
     p2 = Paragraph(text2, style_justify)
     w2, h2 = p2.wrapOn(c, width - 100, height)
     y_pos -= h2

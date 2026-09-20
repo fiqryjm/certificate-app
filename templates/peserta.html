@@ -43,6 +43,7 @@
                         <th>No</th>
                         <th>Nama Peserta</th>
                         <th>Perusahaan</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -51,10 +52,13 @@
                         <td style="width: 50px;">{{ loop.index }}</td>
                         <td><strong>{{ p.nama_peserta }}</strong></td>
                         <td>{{ p.perusahaan or '-' }}</td>
+                        <td>
+                            <a href="{{ url_for('edit_peserta', peserta_id=p.id) }}" class="btn btn-secondary btn-sm" style="background: #F59E0B; color: white; border: none; padding: 0.2rem 0.5rem; font-size: 0.8rem;">Edit</a>
+                        </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="3" style="text-align: center; padding: 2rem;">Belum ada peserta di pelatihan ini.</td>
+                        <td colspan="4" style="text-align: center; padding: 2rem;">Belum ada peserta di pelatihan ini.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
