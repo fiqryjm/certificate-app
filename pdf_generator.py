@@ -232,7 +232,7 @@ def generate_sk_direksi_pdf(pelatihan, template_path=None):
     y_pos -= 80
     
     # Menempelkan tanda tangan
-    ttd_path = r'C:\Aplikasi\certificat-app\static\templates\ttd-dudus.jpg'
+    ttd_path = 'static/templates/ttd-dudus.jpg'
     if os.path.exists(ttd_path):
         # mask='auto' biasanya membantu untuk menghilangkan background putih jika ada
         c.drawImage(ttd_path, width - 255, y_pos + 5, width=140, height=65, preserveAspectRatio=True, mask='auto')
