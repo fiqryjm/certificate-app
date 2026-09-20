@@ -34,9 +34,15 @@ def generate_sertifikat_pdf(pelatihan, template_path=None, peserta_id=None):
                 print(f"Error loading template: {e}")
         
         # 2. Draw Text (Adjust coordinates based on actual template)
-        c.setFont("Helvetica-Bold", 28)
         # Center the name
-        c.drawCentredString(width / 2.0, height / 2.0 + 80, peserta.nama_peserta)
+        name_font, name_size = "Helvetica-Bold", 28
+        c.setFont(name_font, name_size)
+        name_y = height / 2.0 + 80
+        c.drawCentredString(width / 2.0, name_y, peserta.nama_peserta)
+        
+        # Draw underline for name
+        name_width = c.stringWidth(peserta.nama_peserta, name_font, name_size)
+        c.line(width / 2.0 - name_width / 2.0, name_y - 4, width / 2.0 + name_width / 2.0, name_y - 4)
         
         # Date Logic
         d_mulai = pelatihan.tanggal_mulai
@@ -55,14 +61,6 @@ def generate_sertifikat_pdf(pelatihan, template_path=None, peserta_id=None):
         else:
             tgl_str = f"{d_mulai.day:02d} {m_mulai} {d_mulai.year} - {d_selesai.day:02d} {m_selesai} {d_selesai.year}"
             
-        c.setFont("Helvetica-Bold", 24)
-        c.drawCentredString(width / 2.0, height / 2.0 + 0, pelatihan.judul_pelatihan)
-        
-        c.setFont("Helvetica", 16)
-        c.drawCentredString(width / 2.0, height / 2.0 - 90, pelatihan.tempat)
-        c.drawCentredString(width / 2.0, height / 2.0 - 110, tgl_str)
-
-        # Instruktur (Kiri)
         try:
             # Mencoba memuat Garamond dari sistem (Windows)
             from reportlab.pdfbase.ttfonts import TTFont
@@ -72,15 +70,46 @@ def generate_sertifikat_pdf(pelatihan, template_path=None, peserta_id=None):
             font_inst = 'Garamond'
             font_inst_it = 'Garamond-Italic'
         except:
-            # Fallback ke Times-Roman jika Garamond tidak ditemukan (terutama di VPS Linux nanti)
+            # Fallback ke Times-Roman jika Garamond tidak ditemukan
             font_inst = 'Times-Roman'
             font_inst_it = 'Times-Italic'
 
+        judul_font, judul_size = "Helvetica-Bold", 24
+        c.setFont(judul_font, judul_size)
+        judul_y = height / 2.0 + 0
+        c.drawCentredString(width / 2.0, judul_y, pelatihan.judul_pelatihan)
+        
+        # Draw underline for judul
+        judul_width = c.stringWidth(pelatihan.judul_pelatihan, judul_font, judul_size)
+        c.line(width / 2.0 - judul_width / 2.0, judul_y - 4, width / 2.0 + judul_width / 2.0, judul_y - 4)
+        
+        # Tambahan tulisan "Training"
+        c.setFont(font_inst, 14)
+        c.drawCentredString(width / 2.0, judul_y - 20, "training")
+        
+        tempat_font, tempat_size = "Helvetica", 16
+        c.setFont(tempat_font, tempat_size)
+        tempat_y = height / 2.0 - 90
+        c.drawCentredString(width / 2.0, tempat_y, pelatihan.tempat)
+        
+        # Draw underline for tempat
+        tempat_width = c.stringWidth(pelatihan.tempat, tempat_font, tempat_size)
+        c.line(width / 2.0 - tempat_width / 2.0, tempat_y - 4, width / 2.0 + tempat_width / 2.0, tempat_y - 4)
+        
+        c.drawCentredString(width / 2.0, height / 2.0 - 110, tgl_str)
+
+        # Instruktur (Kiri)
         c.setFont(font_inst, 12)
-        c.drawCentredString(width / 2.0 - 180, height / 2.0 - 200, pelatihan.nama_instruktur)
+        inst_y = height / 2.0 - 200
+        inst_x = width / 2.0 - 150
+        c.drawCentredString(inst_x, inst_y, pelatihan.nama_instruktur)
+        
+        # Draw underline for instruktur
+        inst_width = c.stringWidth(pelatihan.nama_instruktur, font_inst, 12)
+        c.line(inst_x - inst_width / 2.0, inst_y - 2, inst_x + inst_width / 2.0, inst_y - 2)
         
         c.setFont(font_inst_it, 12)
-        c.drawCentredString(width / 2.0 - 180, height / 2.0 - 215, "Instructor")
+        c.drawCentredString(width / 2.0 - 150, height / 2.0 - 215, "Instructor")
         
         c.setFont("Helvetica-Oblique", 11)
         c.drawCentredString(width / 2.0, height / 2.0 - 240, f"No. {pelatihan.no_sertifikat}")
