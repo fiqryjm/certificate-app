@@ -49,11 +49,28 @@ def generate_sertifikat_pdf(pelatihan, template_path=None):
         c.drawCentredString(width / 2.0, height / 2.0 + 0, pelatihan.judul_pelatihan)
         
         c.setFont("Helvetica", 16)
-        c.drawCentredString(width / 2.0, height / 2.0 - 110, pelatihan.tempat)
-        c.drawCentredString(width / 2.0, height / 2.0 - 90, tgl_str)
+        c.drawCentredString(width / 2.0, height / 2.0 - 90, pelatihan.tempat)
+        c.drawCentredString(width / 2.0, height / 2.0 - 110, tgl_str)
 
-        c.setFont("Times-Roman", 12)
-        c.drawCentredString(width / 2.0 - 160, height / 2.0 - 200, pelatihan.nama_instruktur)
+        # Instruktur (Kiri)
+        try:
+            # Mencoba memuat Garamond dari sistem (Windows)
+            from reportlab.pdfbase.ttfonts import TTFont
+            from reportlab.pdfbase import pdfmetrics
+            pdfmetrics.registerFont(TTFont('Garamond', 'GARA.TTF'))
+            pdfmetrics.registerFont(TTFont('Garamond-Italic', 'GARAI.TTF'))
+            font_inst = 'Garamond'
+            font_inst_it = 'Garamond-Italic'
+        except:
+            # Fallback ke Times-Roman jika Garamond tidak ditemukan (terutama di VPS Linux nanti)
+            font_inst = 'Times-Roman'
+            font_inst_it = 'Times-Italic'
+
+        c.setFont(font_inst, 12)
+        c.drawCentredString(width / 2.0 - 180, height / 2.0 - 200, pelatihan.nama_instruktur)
+        
+        c.setFont(font_inst_it, 12)
+        c.drawCentredString(width / 2.0 - 180, height / 2.0 - 215, "Instructor")
         
         c.setFont("Helvetica-Oblique", 11)
         c.drawCentredString(width / 2.0, height / 2.0 - 240, f"No. {pelatihan.no_sertifikat}")
