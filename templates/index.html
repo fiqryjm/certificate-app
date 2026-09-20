@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Daftar Pelatihan - Sertifikat Manager{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Daftar Pelatihan</h1>
+    <a href="{{ url_for('tambah_pelatihan') }}" class="btn btn-primary">+ Tambah Pelatihan Baru</a>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Judul Pelatihan</th>
+                    <th>Tanggal</th>
+                    <th>No. Sertifikat</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pelatihan in pelatihans %}
+                <tr>
+                    <td>
+                        <strong>{{ pelatihan.judul_pelatihan }}</strong><br>
+                        <small class="text-muted" style="color: #6B7280;">Instruktur: {{ pelatihan.nama_instruktur }}</small>
+                    </td>
+                    <td>{{ pelatihan.tanggal_mulai.strftime('%d %b %Y') }}</td>
+                    <td><span class="badge">{{ pelatihan.no_sertifikat }}</span></td>
+                    <td>
+                        <a href="{{ url_for('peserta', pelatihan_id=pelatihan.id) }}" class="btn btn-secondary btn-sm" style="margin-right: 0.5rem;">Kelola Peserta</a>
+                        <a href="{{ url_for('cetak_sertifikat', pelatihan_id=pelatihan.id) }}" class="btn btn-primary btn-sm" style="margin-right: 0.5rem; background: #10B981; box-shadow: none;">PDF Sertifikat</a>
+                        <a href="{{ url_for('cetak_sk', pelatihan_id=pelatihan.id) }}" class="btn btn-primary btn-sm" style="background: #3B82F6; box-shadow: none;">PDF SK</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 2rem;">Belum ada data pelatihan. Silakan tambah baru.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

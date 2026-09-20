@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Kelola Peserta - {{ pelatihan.judul_pelatihan }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Kelola Peserta</h1>
+        <p style="color: var(--text-muted); margin-top: 0.5rem;">{{ pelatihan.judul_pelatihan }}</p>
+    </div>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">Kembali</a>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+    <!-- Form Tambah Peserta -->
+    <div class="card">
+        <h3 style="margin-bottom: 1.5rem; font-weight: 600;">Tambah Peserta</h3>
+        <form method="POST">
+            <div class="form-group">
+                <label class="form-label" for="nama_peserta">Nama Lengkap</label>
+                <input type="text" class="form-control" id="nama_peserta" name="nama_peserta" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="perusahaan">Perusahaan</label>
+                <input type="text" class="form-control" id="perusahaan" name="perusahaan">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="keterangan">Keterangan (Opsional)</label>
+                <input type="text" class="form-control" id="keterangan" name="keterangan">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Tambah Peserta</button>
+        </form>
+    </div>
+
+    <!-- Tabel Daftar Peserta -->
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="font-weight: 600;">Daftar Peserta ({{ peserta_list|length }})</h3>
+        </div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Peserta</th>
+                        <th>Perusahaan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in peserta_list %}
+                    <tr>
+                        <td style="width: 50px;">{{ loop.index }}</td>
+                        <td><strong>{{ p.nama_peserta }}</strong></td>
+                        <td>{{ p.perusahaan or '-' }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 2rem;">Belum ada peserta di pelatihan ini.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

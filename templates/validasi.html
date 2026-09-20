@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validasi Sertifikat - PT Fiqry Jaya Manunggal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --success: #10B981;
+            --background: #F3F4F6;
+            --surface: #FFFFFF;
+            --text-main: #1F2937;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .header {
+            background-color: var(--primary);
+            color: white;
+            width: 100%;
+            padding: 2rem 1rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .header p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 2rem 1rem;
+            margin-top: -2rem;
+        }
+        .card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: #DEF7EC;
+            color: #03543F;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+        .status-badge svg {
+            width: 24px;
+            height: 24px;
+        }
+        .detail-row {
+            display: flex;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #E5E7EB;
+            padding-bottom: 1rem;
+        }
+        .detail-label {
+            flex: 0 0 150px;
+            font-weight: 600;
+            color: #6B7280;
+        }
+        .detail-value {
+            flex: 1;
+            font-weight: 600;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #E5E7EB;
+        }
+        th {
+            background-color: #F9FAFB;
+            font-weight: 600;
+        }
+        tr:nth-child(even) td {
+            background-color: #F9FAFB;
+        }
+        .sk-section {
+            background: linear-gradient(to right, #F9FAFB, #FFFFFF);
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Portal Verifikasi Sertifikat</h1>
+    <p>PT Fiqry Jaya Manunggal</p>
+</div>
+
+<div class="container">
+    <div class="card" style="text-align: center;">
+        <div class="status-badge">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            Sertifikat & SK Valid
+        </div>
+        <p style="color: #6B7280; margin-bottom: 2rem;">Dokumen ini diterbitkan secara sah dan diakui oleh direksi.</p>
+
+        <div style="text-align: left;">
+            <div class="detail-row">
+                <div class="detail-label">Judul Pelatihan</div>
+                <div class="detail-value" style="color: var(--primary); font-size: 1.2rem;">{{ pelatihan.judul_pelatihan }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Nomor Sertifikat</div>
+                <div class="detail-value">{{ pelatihan.no_sertifikat }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Instruktur</div>
+                <div class="detail-value">{{ pelatihan.nama_instruktur }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Tempat & Waktu</div>
+                <div class="detail-value">{{ pelatihan.tempat }}, {{ pelatihan.tanggal_mulai.strftime('%d %b %Y') }} - {{ pelatihan.tanggal_selesai.strftime('%d %b %Y') }}</div>
+            </div>
+        </div>
+
+        <div class="sk-section" style="text-align: left;">
+            <h3 style="margin-top: 0;">Surat Keputusan Direksi</h3>
+            <p style="margin-bottom: 0.5rem;"><strong>Nomor SK:</strong> {{ pelatihan.no_sk }}</p>
+            <p style="margin-bottom: 0; color: #4B5563; font-style: italic;">
+                "Menetapkan peserta yang namanya tercantum dalam lampiran di bawah ini telah mengikuti pelatihan dengan baik dan dinyatakan sah."
+            </p>
+            <p style="margin-top: 1rem; font-size: 0.9rem; color: #9CA3AF;">Ditetapkan tanggal: {{ pelatihan.tanggal_sk.strftime('%d %b %Y') }}</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 style="margin-top: 0; border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem; display: inline-block;">Daftar Peserta Sah</h3>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">No</th>
+                        <th>Nama Lengkap</th>
+                        <th>Perusahaan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in pelatihan.peserta %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td style="font-weight: 600;">{{ p.nama_peserta }}</td>
+                        <td>{{ p.perusahaan or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div style="text-align: center; color: #9CA3AF; font-size: 0.875rem; margin-top: 2rem;">
+        &copy; 2026 PT Fiqry Jaya Manunggal. All rights reserved.
+    </div>
+</div>
+
+</body>
+</html>
