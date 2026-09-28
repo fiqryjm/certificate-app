@@ -7,3 +7,4 @@ instance/
 .idea/
 static/qr_codes/
 *.log
+*.pdf

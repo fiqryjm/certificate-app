@@ -1,7 +1,7 @@
 import os
 from io import BytesIO
 from reportlab.lib.pagesizes import A4, landscape
-from reportlab.lib.units import inch
+from reportlab.lib.units import inch, cm
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 
@@ -74,13 +74,21 @@ def generate_sertifikat_pdf(pelatihan, template_path=None, peserta_id=None):
             font_inst = 'Times-Roman'
             font_inst_it = 'Times-Italic'
 
-        judul_font, judul_size = "Helvetica-Bold", 24
+        judul_font = "Helvetica-Bold"
+        judul_size = 24
+        max_judul_width = 23 * cm  # Batas maksimal panjang teks (23 cm)
+        
+        # Hitung lebar judul, jika melebihi batas maka perkecil font secara proporsional
+        judul_width = c.stringWidth(pelatihan.judul_pelatihan, judul_font, judul_size)
+        if judul_width > max_judul_width:
+            judul_size = judul_size * (max_judul_width / judul_width)
+            judul_width = c.stringWidth(pelatihan.judul_pelatihan, judul_font, judul_size)
+            
         c.setFont(judul_font, judul_size)
         judul_y = height / 2.0 + 0
         c.drawCentredString(width / 2.0, judul_y, pelatihan.judul_pelatihan)
         
         # Draw underline for judul
-        judul_width = c.stringWidth(pelatihan.judul_pelatihan, judul_font, judul_size)
         c.line(width / 2.0 - judul_width / 2.0, judul_y - 4, width / 2.0 + judul_width / 2.0, judul_y - 4)
         
         # Tambahan tulisan "Training"
