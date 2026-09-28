@@ -89,6 +89,18 @@ def edit_pelatihan(pelatihan_id):
         
     return render_template('form_pelatihan.html', pelatihan=pelatihan)
 
+@app.route('/pelatihan/<int:pelatihan_id>/hapus', methods=['POST'])
+def hapus_pelatihan(pelatihan_id):
+    pelatihan = Pelatihan.query.get_or_404(pelatihan_id)
+    if pelatihan.qr_code_path and os.path.exists(pelatihan.qr_code_path):
+        try:
+            os.remove(pelatihan.qr_code_path)
+        except Exception as e:
+            print(f"Error removing QR code: {e}")
+    db.session.delete(pelatihan)
+    db.session.commit()
+    return redirect(url_for('index'))
+
 @app.route('/pelatihan/<int:pelatihan_id>/peserta', methods=['GET', 'POST'])
 def peserta(pelatihan_id):
     pelatihan = Pelatihan.query.get_or_404(pelatihan_id)
@@ -117,6 +129,14 @@ def edit_peserta(peserta_id):
         return redirect(url_for('peserta', pelatihan_id=peserta.pelatihan_id))
         
     return render_template('edit_peserta.html', peserta=peserta)
+
+@app.route('/peserta/<int:peserta_id>/hapus', methods=['POST'])
+def hapus_peserta(peserta_id):
+    peserta = Peserta.query.get_or_404(peserta_id)
+    pelatihan_id = peserta.pelatihan_id
+    db.session.delete(peserta)
+    db.session.commit()
+    return redirect(url_for('peserta', pelatihan_id=pelatihan_id))
 
 @app.route('/pelatihan/<int:pelatihan_id>/cetak_sertifikat')
 def cetak_sertifikat(pelatihan_id):
