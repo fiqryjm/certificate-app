@@ -56,7 +56,10 @@
 
         <div class="form-group">
             <label class="form-label" for="silabus">Silabus / Materi (Opsional)</label>
-            <textarea class="form-control" id="silabus" name="silabus" rows="4">{{ pelatihan.silabus if pelatihan else '' }}</textarea>
+            <textarea class="form-control" id="silabus" name="silabus" rows="5" placeholder="Contoh:&#10;1. Understanding the Fundamentals:&#10;   a. Fundamental of Petroleum Exploration&#10;   b. Basic Reservoir Engineering&#10;2. PSC Business Process:&#10;   - WP&B&#10;   - AFE">{{ pelatihan.silabus if pelatihan else '' }}</textarea>
+            <small style="color: #6B7280; font-size: 0.825rem; display: block; margin-top: 0.35rem;">
+                💡 <b>Tips format:</b> Tuliskan <b>1., 2.</b> untuk topik utama, dan huruf <b>a., b.</b> atau simbol strip <b>-</b> untuk sub-materi (akan otomatis berindentasi dan ber-bullet rapi).
+            </small>
         </div>
 
         <div style="margin-top: 2rem;">

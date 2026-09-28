@@ -139,7 +139,19 @@ def generate_sertifikat_pdf(pelatihan, template_path=None, peserta_id=None):
         if os.path.exists(logo_path):
             c.drawImage(logo_path, width - 150, height - 100, width=100, height=100, preserveAspectRatio=True, mask='auto')
             
-        c.setFont("Helvetica-Bold", 16)
+        import re
+        from reportlab.platypus import Paragraph
+        from reportlab.lib.styles import ParagraphStyle
+        from reportlab.lib import colors
+
+        # Ukuran font judul di halaman silabus agar tidak menabrak logo
+        silabus_title_font = "Helvetica-Bold"
+        silabus_title_size = 16
+        max_title_w = width - 260
+        title_w = c.stringWidth(pelatihan.judul_pelatihan, silabus_title_font, silabus_title_size)
+        if title_w > max_title_w:
+            silabus_title_size = silabus_title_size * (max_title_w / title_w)
+        c.setFont(silabus_title_font, silabus_title_size)
         c.drawString(100, height - 100, pelatihan.judul_pelatihan)
         
         c.setFont("Helvetica-Bold", 14)
@@ -147,15 +159,65 @@ def generate_sertifikat_pdf(pelatihan, template_path=None, peserta_id=None):
         # Underline
         c.line(100, height - 132, 250, height - 132)
         
-        c.setFont("Helvetica", 12)
+        style_header = ParagraphStyle(
+            'OutlineHeader',
+            fontName='Helvetica-Bold',
+            fontSize=11,
+            leading=14,
+            textColor=colors.black
+        )
+        style_sub = ParagraphStyle(
+            'OutlineSub',
+            fontName='Helvetica',
+            fontSize=10,
+            leading=13,
+            leftIndent=24,
+            firstLineIndent=-14,
+            textColor=colors.black
+        )
+        
+        avail_w = width - 200
         y_pos = height - 160
+        is_first_header = True
+        
         if pelatihan.silabus:
             for line in pelatihan.silabus.split('\n'):
                 line = line.strip()
-                if line:
-                    c.drawString(100, y_pos, line)
-                    y_pos -= 20
+                if not line:
+                    continue
+                
+                # Deteksi apakah baris merupakan sub-item (a., b., -, *, •, 1.1, dsb)
+                sub_match = re.match(r'^([a-zA-Z][\.\)]|[-*•]|\d+\.\d+)\s*(.*)', line)
+                if sub_match:
+                    bullet_sym = sub_match.group(1)
+                    content = sub_match.group(2)
+                    if bullet_sym in ['-', '*']:
+                        bullet_sym = '&bull;'
+                    formatted_text = f"<b>{bullet_sym}</b> {content}"
+                    p = Paragraph(formatted_text, style_sub)
+                    w, h = p.wrapOn(c, avail_w, height)
+                    if y_pos - h < 40:
+                        c.showPage()
+                        y_pos = height - 80
+                    y_pos -= h
+                    p.drawOn(c, 100, y_pos)
+                    y_pos -= 3
+                else:
+                    # Kategori / Topik Utama (Header)
+                    if not is_first_header:
+                        y_pos -= 6  # Spasi pemisah sebelum header baru
+                    is_first_header = False
+                    
+                    p = Paragraph(line, style_header)
+                    w, h = p.wrapOn(c, avail_w, height)
+                    if y_pos - h < 40:
+                        c.showPage()
+                        y_pos = height - 80
+                    y_pos -= h
+                    p.drawOn(c, 100, y_pos)
+                    y_pos -= 3
         else:
+            c.setFont("Helvetica", 11)
             c.drawString(100, y_pos, "(Tidak ada silabus yang diisi)")
             
         c.showPage() # End of syllabus page
