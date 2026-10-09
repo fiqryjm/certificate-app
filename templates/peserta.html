@@ -58,6 +58,7 @@
                                 <button type="submit" class="btn btn-secondary btn-sm" style="background: #EF4444; color: white; border: none; padding: 0.2rem 0.5rem; font-size: 0.8rem; margin-left: 0.25rem; cursor: pointer;">Hapus</button>
                             </form>
                             <a href="{{ url_for('cetak_sertifikat_peserta', peserta_id=p.id) }}" class="btn btn-primary btn-sm" style="background: #10B981; color: white; border: none; padding: 0.2rem 0.5rem; font-size: 0.8rem; margin-left: 0.25rem;">Cetak</a>
+                            <a href="{{ url_for('cetak_sertifikat_peserta_blanko', peserta_id=p.id) }}" class="btn btn-primary btn-sm" style="background: #059669; color: white; border: none; padding: 0.2rem 0.5rem; font-size: 0.8rem; margin-left: 0.25rem;" title="Cetak Blanko (Tanpa template & garis datar)">Cetak Blanko</a>
                         </td>
                     </tr>
                     {% else %}

@@ -154,6 +154,17 @@ def cetak_sertifikat(pelatihan_id):
         mimetype='application/pdf'
     )
 
+@app.route('/pelatihan/<int:pelatihan_id>/cetak_sertifikat_blanko')
+def cetak_sertifikat_blanko(pelatihan_id):
+    pelatihan = Pelatihan.query.get_or_404(pelatihan_id)
+    pdf_buffer = generate_sertifikat_pdf(pelatihan, template_path=None, is_blanko=True)
+    return send_file(
+        pdf_buffer,
+        as_attachment=True,
+        download_name=f"Sertifikat_Blanko_{pelatihan.judul_pelatihan.replace(' ', '_')}.pdf",
+        mimetype='application/pdf'
+    )
+
 @app.route('/peserta/<int:peserta_id>/cetak_sertifikat')
 def cetak_sertifikat_peserta(peserta_id):
     peserta = Peserta.query.get_or_404(peserta_id)
@@ -167,6 +178,18 @@ def cetak_sertifikat_peserta(peserta_id):
         pdf_buffer,
         as_attachment=True,
         download_name=f"Sertifikat_{peserta.nama_peserta.replace(' ', '_')}.pdf",
+        mimetype='application/pdf'
+    )
+
+@app.route('/peserta/<int:peserta_id>/cetak_sertifikat_blanko')
+def cetak_sertifikat_peserta_blanko(peserta_id):
+    peserta = Peserta.query.get_or_404(peserta_id)
+    pelatihan = Pelatihan.query.get(peserta.pelatihan_id)
+    pdf_buffer = generate_sertifikat_pdf(pelatihan, template_path=None, peserta_id=peserta.id, is_blanko=True)
+    return send_file(
+        pdf_buffer,
+        as_attachment=True,
+        download_name=f"Sertifikat_Blanko_{peserta.nama_peserta.replace(' ', '_')}.pdf",
         mimetype='application/pdf'
     )
 

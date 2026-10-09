@@ -35,6 +35,7 @@
                                 <button type="submit" class="btn btn-secondary btn-sm" style="background: #EF4444; color: white; border: none; cursor: pointer;">Hapus</button>
                             </form>
                             <a href="{{ url_for('cetak_sertifikat', pelatihan_id=pelatihan.id) }}" class="btn btn-primary btn-sm" style="background: #10B981; box-shadow: none;">PDF Sertifikat</a>
+                            <a href="{{ url_for('cetak_sertifikat_blanko', pelatihan_id=pelatihan.id) }}" class="btn btn-primary btn-sm" style="background: #059669; box-shadow: none;" title="Cetak Sertifikat Blanko (Tanpa template & garis datar)">PDF Blanko</a>
                             <a href="{{ url_for('cetak_sk', pelatihan_id=pelatihan.id) }}" class="btn btn-primary btn-sm" style="background: #3B82F6; box-shadow: none;">PDF SK</a>
                         </div>
                     </td>

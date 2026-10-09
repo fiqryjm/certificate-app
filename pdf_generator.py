@@ -1,13 +1,14 @@
 import os
 from io import BytesIO
 from reportlab.lib.pagesizes import A4, landscape
-from reportlab.lib.units import inch, cm
+from reportlab.lib.units import inch, cm, mm
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 
-def generate_sertifikat_pdf(pelatihan, template_path=None, peserta_id=None):
+def generate_sertifikat_pdf(pelatihan, template_path=None, peserta_id=None, is_blanko=False):
     """
     Generate PDF Sertifikat for all participants or a specific one, with syllabus page.
+    If is_blanko=True, template background and horizontal lines (underlines) are omitted.
     """
     buffer = BytesIO()
     # Certificate is usually landscape
@@ -25,8 +26,8 @@ def generate_sertifikat_pdf(pelatihan, template_path=None, peserta_id=None):
         c.showPage()
         
     for peserta in peserta_list:
-        # 1. Draw Template (if provided)
-        if template_path and os.path.exists(template_path):
+        # 1. Draw Template (if provided and not blanko mode)
+        if not is_blanko and template_path and os.path.exists(template_path):
             try:
                 # Fill the page with the template
                 c.drawImage(template_path, 0, 0, width=width, height=height)
@@ -40,9 +41,10 @@ def generate_sertifikat_pdf(pelatihan, template_path=None, peserta_id=None):
         name_y = height / 2.0 + 80
         c.drawCentredString(width / 2.0, name_y, peserta.nama_peserta)
         
-        # Draw underline for name
-        name_width = c.stringWidth(peserta.nama_peserta, name_font, name_size)
-        c.line(width / 2.0 - name_width / 2.0, name_y - 4, width / 2.0 + name_width / 2.0, name_y - 4)
+        # Draw underline for name (only if not blanko)
+        if not is_blanko:
+            name_width = c.stringWidth(peserta.nama_peserta, name_font, name_size)
+            c.line(width / 2.0 - name_width / 2.0, name_y - 4, width / 2.0 + name_width / 2.0, name_y - 4)
         
         # Date Logic
         d_mulai = pelatihan.tanggal_mulai
@@ -74,6 +76,10 @@ def generate_sertifikat_pdf(pelatihan, template_path=None, peserta_id=None):
             font_inst = 'Times-Roman'
             font_inst_it = 'Times-Italic'
 
+        # Penyesuaian offset posisi khusus untuk PDF Blanko (kertas blanko fisik)
+        offset_judul_tempat = 1 * mm if is_blanko else 0
+        offset_instruktur = 2 * mm if is_blanko else 0
+
         judul_font = "Helvetica-Bold"
         judul_size = 24
         max_judul_width = 23 * cm  # Batas maksimal panjang teks (23 cm)
@@ -85,11 +91,12 @@ def generate_sertifikat_pdf(pelatihan, template_path=None, peserta_id=None):
             judul_width = c.stringWidth(pelatihan.judul_pelatihan, judul_font, judul_size)
             
         c.setFont(judul_font, judul_size)
-        judul_y = height / 2.0 + 0
+        judul_y = height / 2.0 + 0 - offset_judul_tempat
         c.drawCentredString(width / 2.0, judul_y, pelatihan.judul_pelatihan)
         
-        # Draw underline for judul
-        c.line(width / 2.0 - judul_width / 2.0, judul_y - 4, width / 2.0 + judul_width / 2.0, judul_y - 4)
+        # Draw underline for judul (only if not blanko)
+        if not is_blanko:
+            c.line(width / 2.0 - judul_width / 2.0, judul_y - 4, width / 2.0 + judul_width / 2.0, judul_y - 4)
         
         # Tambahan tulisan "Training"
         c.setFont(font_inst, 14)
@@ -97,27 +104,30 @@ def generate_sertifikat_pdf(pelatihan, template_path=None, peserta_id=None):
         
         tempat_font, tempat_size = "Helvetica", 16
         c.setFont(tempat_font, tempat_size)
-        tempat_y = height / 2.0 - 90
+        tempat_y = height / 2.0 - 90 - offset_judul_tempat
         c.drawCentredString(width / 2.0, tempat_y, pelatihan.tempat)
         
-        # Draw underline for tempat
-        tempat_width = c.stringWidth(pelatihan.tempat, tempat_font, tempat_size)
-        c.line(width / 2.0 - tempat_width / 2.0, tempat_y - 4, width / 2.0 + tempat_width / 2.0, tempat_y - 4)
+        # Draw underline for tempat (only if not blanko)
+        if not is_blanko:
+            tempat_width = c.stringWidth(pelatihan.tempat, tempat_font, tempat_size)
+            c.line(width / 2.0 - tempat_width / 2.0, tempat_y - 4, width / 2.0 + tempat_width / 2.0, tempat_y - 4)
         
-        c.drawCentredString(width / 2.0, height / 2.0 - 110, tgl_str)
+        tgl_y = height / 2.0 - 110 - offset_judul_tempat
+        c.drawCentredString(width / 2.0, tgl_y, tgl_str)
 
         # Instruktur (Kiri)
         c.setFont(font_inst, 12)
-        inst_y = height / 2.0 - 200
+        inst_y = height / 2.0 - 200 - offset_instruktur
         inst_x = width / 2.0 - 150
         c.drawCentredString(inst_x, inst_y, pelatihan.nama_instruktur)
         
-        # Draw underline for instruktur
-        inst_width = c.stringWidth(pelatihan.nama_instruktur, font_inst, 12)
-        c.line(inst_x - inst_width / 2.0, inst_y - 2, inst_x + inst_width / 2.0, inst_y - 2)
+        # Draw underline for instruktur (only if not blanko)
+        if not is_blanko:
+            inst_width = c.stringWidth(pelatihan.nama_instruktur, font_inst, 12)
+            c.line(inst_x - inst_width / 2.0, inst_y - 2, inst_x + inst_width / 2.0, inst_y - 2)
         
         c.setFont(font_inst_it, 12)
-        c.drawCentredString(width / 2.0 - 150, height / 2.0 - 215, "Instructor")
+        c.drawCentredString(width / 2.0 - 150, inst_y - 15, "Instructor")
         
         c.setFont("Helvetica-Oblique", 11)
         c.drawCentredString(width / 2.0, height / 2.0 - 240, f"No. {pelatihan.no_sertifikat}")
