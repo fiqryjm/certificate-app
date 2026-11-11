@@ -18,6 +18,24 @@ os.makedirs('static/templates', exist_ok=True)
 
 with app.app_context():
     db.create_all()
+    # Auto-migrate SQLite schema for existing databases
+    try:
+        import sqlite3
+        db_path = os.path.join(app.instance_path, 'cert.db')
+        if not os.path.exists(db_path):
+            db_path = 'cert.db'
+        if os.path.exists(db_path):
+            conn = sqlite3.connect(db_path)
+            cur = conn.cursor()
+            cols = [c[1] for c in cur.execute('PRAGMA table_info(pelatihans)').fetchall()]
+            if 'nama_co_trainer' not in cols:
+                cur.execute('ALTER TABLE pelatihans ADD COLUMN nama_co_trainer VARCHAR(255)')
+            if 'nama_asisten_trainer' not in cols:
+                cur.execute('ALTER TABLE pelatihans ADD COLUMN nama_asisten_trainer VARCHAR(255)')
+            conn.commit()
+            conn.close()
+    except Exception as e:
+        print(f"Auto-migration info: {e}")
 
 @app.route('/')
 def index():
