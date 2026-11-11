@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Edit Trainer / Asisten - Sertifikat Manager{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Edit Pengajar / Asisten</h1>
+    <a href="{{ url_for('trainer', pelatihan_id=trainer.pelatihan_id) }}" class="btn btn-secondary">Kembali</a>
+</div>
+
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <form method="POST">
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label" for="nama" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Nama Lengkap & Gelar</label>
+            <input type="text" class="form-control" id="nama" name="nama" required value="{{ trainer.nama }}" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px;">
+        </div>
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label class="form-label" for="peran" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Peran</label>
+            <select class="form-control" id="peran" name="peran" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: white;">
+                <option value="Trainer" {% if trainer.peran == 'Trainer' or trainer.peran == 'Sebagai Trainer' %}selected{% endif %}>Trainer (Sebagai Trainer)</option>
+                <option value="Co-Trainer" {% if trainer.peran == 'Co-Trainer' or trainer.peran == 'Sebagai Co-Trainer' %}selected{% endif %}>Co-Trainer (Sebagai Co-Trainer)</option>
+                <option value="Asisten Trainer" {% if trainer.peran == 'Asisten Trainer' or trainer.peran == 'Sebagai Asisten Trainer' %}selected{% endif %}>Asisten Trainer (Sebagai Asisten Trainer)</option>
+            </select>
+        </div>
+        <div style="margin-top: 2rem;">
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Simpan Perubahan</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+

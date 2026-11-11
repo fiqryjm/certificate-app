@@ -178,6 +178,57 @@
             </table>
         </div>
     </div>
+
+    <div class="card">
+        <h3 style="margin-top: 0; border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem; display: inline-block;">Daftar Tim Pengajar</h3>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">No</th>
+                        <th>Nama Pengajar</th>
+                        <th>Peran</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set ns_val = namespace(count=1) %}
+                    {% if pelatihan.nama_instruktur %}
+                    <tr>
+                        <td>{{ ns_val.count }}</td>
+                        <td style="font-weight: 600;">{{ pelatihan.nama_instruktur }}</td>
+                        <td>Trainer</td>
+                    </tr>
+                    {% set ns_val.count = ns_val.count + 1 %}
+                    {% endif %}
+                    {% if pelatihan.nama_co_trainer %}
+                    <tr>
+                        <td>{{ ns_val.count }}</td>
+                        <td style="font-weight: 600;">{{ pelatihan.nama_co_trainer }}</td>
+                        <td>Co-Trainer</td>
+                    </tr>
+                    {% set ns_val.count = ns_val.count + 1 %}
+                    {% endif %}
+                    {% if pelatihan.nama_asisten_trainer %}
+                    <tr>
+                        <td>{{ ns_val.count }}</td>
+                        <td style="font-weight: 600;">{{ pelatihan.nama_asisten_trainer }}</td>
+                        <td>Asisten Trainer</td>
+                    </tr>
+                    {% set ns_val.count = ns_val.count + 1 %}
+                    {% endif %}
+                    {% for t in pelatihan.trainers %}
+                    <tr>
+                        <td>{{ ns_val.count }}</td>
+                        <td style="font-weight: 600;">{{ t.nama }}</td>
+                        <td>{{ t.peran }}</td>
+                    </tr>
+                    {% set ns_val.count = ns_val.count + 1 %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
     
     <div style="text-align: center; color: #9CA3AF; font-size: 0.875rem; margin-top: 2rem;">
         &copy; 2026 PT Fiqry Jaya Manunggal. All rights reserved.

@@ -12,6 +12,8 @@ class Pelatihan(db.Model):
     tanggal_mulai = db.Column(db.Date, nullable=False)
     tanggal_selesai = db.Column(db.Date, nullable=False)
     nama_instruktur = db.Column(db.String(255), nullable=False)
+    nama_co_trainer = db.Column(db.String(255), nullable=True)
+    nama_asisten_trainer = db.Column(db.String(255), nullable=True)
     no_sertifikat = db.Column(db.String(100), nullable=False)
     no_sk = db.Column(db.String(100), nullable=False)
     tanggal_sk = db.Column(db.Date, nullable=False)
@@ -21,6 +23,8 @@ class Pelatihan(db.Model):
     
     # Relationship to Peserta
     peserta = db.relationship('Peserta', backref='pelatihan', lazy=True, cascade="all, delete-orphan")
+    # Relationship to Trainer
+    trainers = db.relationship('Trainer', backref='pelatihan', lazy=True, cascade="all, delete-orphan")
 
 class Peserta(db.Model):
     __tablename__ = 'peserta'
@@ -30,3 +34,11 @@ class Peserta(db.Model):
     nama_peserta = db.Column(db.String(255), nullable=False)
     perusahaan = db.Column(db.String(255), nullable=True)
     keterangan = db.Column(db.String(255), nullable=True)
+
+class Trainer(db.Model):
+    __tablename__ = 'trainers'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    pelatihan_id = db.Column(db.Integer, db.ForeignKey('pelatihans.id'), nullable=False)
+    nama = db.Column(db.String(255), nullable=False)
+    peran = db.Column(db.String(50), nullable=False) # 'Trainer', 'Co-Trainer', 'Asisten Trainer'

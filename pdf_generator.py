@@ -236,6 +236,7 @@ def generate_sertifikat_pdf(pelatihan, template_path=None, peserta_id=None, is_b
     buffer.seek(0)
     return buffer
 
+
 def generate_sk_direksi_pdf(pelatihan, template_path=None):
     """
     Generate Surat Keputusan Direksi.
@@ -406,6 +407,215 @@ def generate_sk_direksi_pdf(pelatihan, template_path=None):
             else:
                 break
     
+    c.save()
+    buffer.seek(0)
+    return buffer
+
+
+def generate_sertifikat_trainer_pdf(pelatihan, template_path=None, trainer_id=None, is_blanko=False):
+    """
+    Generate PDF Sertifikat for Trainer/Co-Trainer/Asisten Trainer.
+    If trainer_id is given, generates for that specific trainer.
+    Otherwise, automatically includes:
+    1. pelatihan.nama_instruktur (Trainer)
+    2. pelatihan.nama_co_trainer (Co-Trainer, if filled)
+    3. pelatihan.nama_asisten_trainer (Asisten Trainer, if filled)
+    4. Any additional trainers in pelatihan.trainers
+    """
+    buffer = BytesIO()
+    c = canvas.Canvas(buffer, pagesize=landscape(A4))
+    width, height = landscape(A4)
+    
+    trainer_list = []
+    if trainer_id:
+        # Check in pelatihan.trainers
+        matching = [t for t in pelatihan.trainers if t.id == trainer_id]
+        if matching:
+            trainer_list = [{'nama': matching[0].nama, 'peran': matching[0].peran}]
+        elif str(trainer_id) == 'main' or str(trainer_id) == 'trainer':
+            trainer_list = [{'nama': pelatihan.nama_instruktur, 'peran': 'Trainer'}]
+        elif str(trainer_id) == 'co':
+            trainer_list = [{'nama': pelatihan.nama_co_trainer, 'peran': 'Co-Trainer'}]
+        elif str(trainer_id) == 'asst':
+            trainer_list = [{'nama': pelatihan.nama_asisten_trainer, 'peran': 'Asisten Trainer'}]
+    else:
+        # 1. Main Trainer
+        if pelatihan.nama_instruktur and pelatihan.nama_instruktur.strip():
+            trainer_list.append({'nama': pelatihan.nama_instruktur.strip(), 'peran': 'Trainer'})
+        # 2. Co-Trainer (if filled)
+        if hasattr(pelatihan, 'nama_co_trainer') and pelatihan.nama_co_trainer and pelatihan.nama_co_trainer.strip():
+            trainer_list.append({'nama': pelatihan.nama_co_trainer.strip(), 'peran': 'Co-Trainer'})
+        # 3. Asisten Trainer (if filled)
+        if hasattr(pelatihan, 'nama_asisten_trainer') and pelatihan.nama_asisten_trainer and pelatihan.nama_asisten_trainer.strip():
+            trainer_list.append({'nama': pelatihan.nama_asisten_trainer.strip(), 'peran': 'Asisten Trainer'})
+        # 4. Extra trainers from table
+        for t in pelatihan.trainers:
+            already = any(r['nama'].lower() == t.nama.strip().lower() and r['peran'].lower() == t.peran.strip().lower() for r in trainer_list)
+            if not already:
+                trainer_list.append({'nama': t.nama.strip(), 'peran': t.peran.strip()})
+        
+    if not trainer_list:
+        c.setFont("Helvetica", 16)
+        c.drawString(100, height / 2.0, "Belum ada data trainer/asisten untuk dicetak.")
+        c.showPage()
+        c.save()
+        buffer.seek(0)
+        return buffer
+
+    # Default template: static/templates/sertifikat_trainer.jpg or sertifikat_trainers.jpg
+    if not is_blanko and (not template_path or not os.path.exists(template_path)):
+        if os.path.exists('static/templates/sertifikat_trainer.jpg'):
+            template_path = 'static/templates/sertifikat_trainer.jpg'
+        elif os.path.exists('static/templates/sertifikat_trainers.jpg'):
+            template_path = 'static/templates/sertifikat_trainers.jpg'
+        elif os.path.exists('static/templates/sertifikat_template.jpg'):
+            template_path = 'static/templates/sertifikat_template.jpg'
+        else:
+            template_path = None
+
+    is_trainer_template = not is_blanko and template_path and ('trainer' in os.path.basename(template_path).lower())
+
+    # Font setup
+    try:
+        from reportlab.pdfbase.ttfonts import TTFont
+        from reportlab.pdfbase import pdfmetrics
+        pdfmetrics.registerFont(TTFont('Garamond', 'GARA.TTF'))
+        pdfmetrics.registerFont(TTFont('Garamond-Italic', 'GARAI.TTF'))
+        font_role = 'Garamond-Italic'
+    except Exception:
+        font_role = 'Times-Italic'
+
+    # Date Logic
+    d_mulai = pelatihan.tanggal_mulai
+    d_selesai = pelatihan.tanggal_selesai
+    months_id = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
+    m_mulai = months_id[d_mulai.month]
+    m_selesai = months_id[d_selesai.month]
+    
+    if d_mulai.year == d_selesai.year and d_mulai.month == d_selesai.month:
+        if d_mulai.day == d_selesai.day:
+            tgl_str = f"{d_mulai.day:02d} {m_mulai} {d_mulai.year}"
+        else:
+            tgl_str = f"{d_mulai.day:02d} - {d_selesai.day:02d} {m_mulai} {d_mulai.year}"
+    elif d_mulai.year == d_selesai.year:
+        tgl_str = f"{d_mulai.day:02d} {m_mulai} - {d_selesai.day:02d} {m_selesai} {d_mulai.year}"
+    else:
+        tgl_str = f"{d_mulai.day:02d} {m_mulai} {d_mulai.year} - {d_selesai.day:02d} {m_selesai} {d_selesai.year}"
+
+    for trainer in trainer_list:
+        t_nama = trainer['nama']
+        t_peran = trainer['peran']
+        # 1. Background Template
+        if not is_blanko and template_path and os.path.exists(template_path):
+            try:
+                c.drawImage(template_path, 0, 0, width=width, height=height)
+            except Exception as e:
+                print(f"Error loading template: {e}")
+
+        # Peran text formatting: "Sebagai Trainer", "Sebagai Co-Trainer", "Sebagai Asisten Trainer"
+        role_text = t_peran
+        if not role_text.lower().startswith("sebagai"):
+            role_text = f"Sebagai {role_text}"
+
+        if is_trainer_template or is_blanko:
+            # Layout specifically tuned for sertifikat_trainer.jpg (and blanko)
+            # 2.1 Nama Trainer (diturunkan agar berjarak proporsional dari 'Diberikan Kepada :')
+            name_font, name_size = "Helvetica-Bold", 26
+            name_max_w = 23 * cm
+            name_w = c.stringWidth(t_nama, name_font, name_size)
+            if name_w > name_max_w:
+                name_size = name_size * (name_max_w / name_w)
+                name_w = c.stringWidth(t_nama, name_font, name_size)
+
+            name_y = 308
+            c.setFont(name_font, name_size)
+            c.drawCentredString(width / 2.0, name_y, t_nama)
+            if not is_blanko:
+                c.line(width / 2.0 - name_w / 2.0, name_y - 4, width / 2.0 + name_w / 2.0, name_y - 4)
+
+            # 2.2 Sebagai ...
+            c.setFont(font_role, 16)
+            c.drawCentredString(width / 2.0, 278, role_text)
+
+            # 2.3 Judul Pelatihan
+            judul_font, judul_size = "Helvetica-Bold", 21
+            max_judul_w = 23 * cm
+            judul_w = c.stringWidth(pelatihan.judul_pelatihan, judul_font, judul_size)
+            if judul_w > max_judul_w:
+                judul_size = judul_size * (max_judul_w / judul_w)
+                judul_w = c.stringWidth(pelatihan.judul_pelatihan, judul_font, judul_size)
+
+            c.setFont(judul_font, judul_size)
+            c.drawCentredString(width / 2.0, 244, pelatihan.judul_pelatihan)
+
+            # 2.4 Tempat
+            tempat_font, tempat_size = "Helvetica", 15
+            c.setFont(tempat_font, tempat_size)
+            tempat_y = 212
+            c.drawCentredString(width / 2.0, tempat_y, pelatihan.tempat)
+            if not is_blanko:
+                tempat_w = c.stringWidth(pelatihan.tempat, tempat_font, tempat_size)
+                c.line(width / 2.0 - tempat_w / 2.0, tempat_y - 3, width / 2.0 + tempat_w / 2.0, tempat_y - 3)
+
+            # 2.5 Tanggal
+            c.setFont("Helvetica", 13)
+            c.drawCentredString(width / 2.0, 188, tgl_str)
+
+            # 2.6 No. Sertifikat
+            c.setFont("Helvetica-Oblique", 10)
+            c.drawCentredString(width / 2.0, 48, f"No. {pelatihan.no_sertifikat}")
+
+            # 2.7 QR Code (di kiri bawah, seimbang dengan tanda tangan Direktur di tengah)
+            qr_path = pelatihan.qr_code_path
+            if qr_path and os.path.exists(qr_path):
+                try:
+                    c.drawImage(qr_path, 150, 65, width=1.1*inch, height=1.1*inch)
+                except Exception as e:
+                    print(f"Error loading QR: {e}")
+        else:
+            # Layout for sertifikat_template.jpg
+            name_font, name_size = "Helvetica-Bold", 26
+            name_y = height / 2.0 + 80
+            c.setFont(name_font, name_size)
+            c.drawCentredString(width / 2.0, name_y, t_nama)
+            name_w = c.stringWidth(t_nama, name_font, name_size)
+            if not is_blanko:
+                c.line(width / 2.0 - name_w / 2.0, name_y - 4, width / 2.0 + name_w / 2.0, name_y - 4)
+
+            c.setFont(font_role, 16)
+            c.drawCentredString(width / 2.0, height / 2.0 + 50, role_text)
+
+            judul_font, judul_size = "Helvetica-Bold", 21
+            max_judul_w = 23 * cm
+            judul_w = c.stringWidth(pelatihan.judul_pelatihan, judul_font, judul_size)
+            if judul_w > max_judul_w:
+                judul_size = judul_size * (max_judul_w / judul_w)
+                judul_w = c.stringWidth(pelatihan.judul_pelatihan, judul_font, judul_size)
+            c.setFont(judul_font, judul_size)
+            c.drawCentredString(width / 2.0, height / 2.0 + 10, pelatihan.judul_pelatihan)
+
+            tempat_font, tempat_size = "Helvetica", 15
+            c.setFont(tempat_font, tempat_size)
+            tempat_y = height / 2.0 - 75
+            c.drawCentredString(width / 2.0, tempat_y, pelatihan.tempat)
+            if not is_blanko:
+                tempat_w = c.stringWidth(pelatihan.tempat, tempat_font, tempat_size)
+                c.line(width / 2.0 - tempat_w / 2.0, tempat_y - 3, width / 2.0 + tempat_w / 2.0, tempat_y - 3)
+
+            c.drawCentredString(width / 2.0, height / 2.0 - 95, tgl_str)
+
+            c.setFont("Helvetica-Oblique", 11)
+            c.drawCentredString(width / 2.0, height / 2.0 - 240, f"No. {pelatihan.no_sertifikat}")
+
+            qr_path = pelatihan.qr_code_path
+            if qr_path and os.path.exists(qr_path):
+                try:
+                    c.drawImage(qr_path, (width - (1.2*inch)) / 2.0, 70, width=1.2*inch, height=1.2*inch)
+                except Exception as e:
+                    print(f"Error loading QR: {e}")
+
+        c.showPage()
+
     c.save()
     buffer.seek(0)
     return buffer

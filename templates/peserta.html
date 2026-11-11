@@ -2,12 +2,15 @@
 {% block title %}Kelola Peserta - {{ pelatihan.judul_pelatihan }}{% endblock %}
 
 {% block content %}
-<div class="page-header">
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
     <div>
-        <h1 class="page-title">Kelola Peserta</h1>
-        <p style="color: var(--text-muted); margin-top: 0.5rem;">{{ pelatihan.judul_pelatihan }}</p>
+        <h1 class="page-title" style="margin-bottom: 0.25rem;">Kelola Peserta</h1>
+        <p style="color: var(--text-muted); margin-top: 0.25rem;">{{ pelatihan.judul_pelatihan }}</p>
     </div>
-    <a href="{{ url_for('index') }}" class="btn btn-secondary">Kembali</a>
+    <div style="display: flex; gap: 0.75rem;">
+        <a href="{{ url_for('trainer', pelatihan_id=pelatihan.id) }}" class="btn btn-secondary" style="border: 1px solid #C7D2FE; background: #EEF2FF; color: #4338CA; font-weight: 600;">Ke Kelola Trainer ({{ pelatihan.trainers|length }})</a>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Kembali</a>
+    </div>
 </div>
 
 <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">

@@ -3,8 +3,8 @@ import uuid
 import qrcode
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, send_file, abort
-from models import db, Pelatihan, Peserta
-from pdf_generator import generate_sertifikat_pdf, generate_sk_direksi_pdf
+from models import db, Pelatihan, Peserta, Trainer
+from pdf_generator import generate_sertifikat_pdf, generate_sk_direksi_pdf, generate_sertifikat_trainer_pdf
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cert.db'
@@ -32,6 +32,8 @@ def tambah_pelatihan():
         tanggal_mulai = datetime.strptime(request.form.get('tanggal_mulai'), '%Y-%m-%d').date()
         tanggal_selesai = datetime.strptime(request.form.get('tanggal_selesai'), '%Y-%m-%d').date()
         nama_instruktur = request.form.get('nama_instruktur')
+        nama_co_trainer = request.form.get('nama_co_trainer')
+        nama_asisten_trainer = request.form.get('nama_asisten_trainer')
         no_sertifikat = request.form.get('no_sertifikat')
         no_sk = request.form.get('no_sk')
         tanggal_sk = datetime.strptime(request.form.get('tanggal_sk'), '%Y-%m-%d').date()
@@ -57,6 +59,8 @@ def tambah_pelatihan():
             tanggal_mulai=tanggal_mulai,
             tanggal_selesai=tanggal_selesai,
             nama_instruktur=nama_instruktur,
+            nama_co_trainer=nama_co_trainer,
+            nama_asisten_trainer=nama_asisten_trainer,
             no_sertifikat=no_sertifikat,
             no_sk=no_sk,
             tanggal_sk=tanggal_sk,
@@ -79,6 +83,8 @@ def edit_pelatihan(pelatihan_id):
         pelatihan.tanggal_mulai = datetime.strptime(request.form.get('tanggal_mulai'), '%Y-%m-%d').date()
         pelatihan.tanggal_selesai = datetime.strptime(request.form.get('tanggal_selesai'), '%Y-%m-%d').date()
         pelatihan.nama_instruktur = request.form.get('nama_instruktur')
+        pelatihan.nama_co_trainer = request.form.get('nama_co_trainer')
+        pelatihan.nama_asisten_trainer = request.form.get('nama_asisten_trainer')
         pelatihan.no_sertifikat = request.form.get('no_sertifikat')
         pelatihan.no_sk = request.form.get('no_sk')
         pelatihan.tanggal_sk = datetime.strptime(request.form.get('tanggal_sk'), '%Y-%m-%d').date()
@@ -137,6 +143,102 @@ def hapus_peserta(peserta_id):
     db.session.delete(peserta)
     db.session.commit()
     return redirect(url_for('peserta', pelatihan_id=pelatihan_id))
+
+@app.route('/pelatihan/<int:pelatihan_id>/trainer', methods=['GET', 'POST'])
+def trainer(pelatihan_id):
+    pelatihan = Pelatihan.query.get_or_404(pelatihan_id)
+    if request.method == 'POST':
+        nama = request.form.get('nama')
+        peran = request.form.get('peran')
+        
+        trainer_obj = Trainer(pelatihan_id=pelatihan.id, nama=nama, peran=peran)
+        db.session.add(trainer_obj)
+        db.session.commit()
+        return redirect(url_for('trainer', pelatihan_id=pelatihan.id))
+        
+    trainer_list = Trainer.query.filter_by(pelatihan_id=pelatihan.id).all()
+    return render_template('trainer.html', pelatihan=pelatihan, trainer_list=trainer_list)
+
+@app.route('/trainer/<int:trainer_id>/edit', methods=['GET', 'POST'])
+def edit_trainer(trainer_id):
+    trainer_obj = Trainer.query.get_or_404(trainer_id)
+    if request.method == 'POST':
+        trainer_obj.nama = request.form.get('nama')
+        trainer_obj.peran = request.form.get('peran')
+        
+        db.session.commit()
+        return redirect(url_for('trainer', pelatihan_id=trainer_obj.pelatihan_id))
+        
+    return render_template('edit_trainer.html', trainer=trainer_obj)
+
+@app.route('/trainer/<int:trainer_id>/hapus', methods=['POST'])
+def hapus_trainer(trainer_id):
+    trainer_obj = Trainer.query.get_or_404(trainer_id)
+    pelatihan_id = trainer_obj.pelatihan_id
+    db.session.delete(trainer_obj)
+    db.session.commit()
+    return redirect(url_for('trainer', pelatihan_id=pelatihan_id))
+
+@app.route('/pelatihan/<int:pelatihan_id>/cetak_sertifikat_trainer')
+def cetak_sertifikat_trainer(pelatihan_id):
+    pelatihan = Pelatihan.query.get_or_404(pelatihan_id)
+    template_path = 'static/templates/sertifikat_trainer.jpg'
+    if not os.path.exists(template_path):
+        template_path = 'static/templates/sertifikat_trainers.jpg'
+    if not os.path.exists(template_path):
+        template_path = 'static/templates/sertifikat_template.jpg'
+    if not os.path.exists(template_path):
+        template_path = None
+    
+    pdf_buffer = generate_sertifikat_trainer_pdf(pelatihan, template_path)
+    return send_file(
+        pdf_buffer,
+        as_attachment=True,
+        download_name=f"Sertifikat_Trainer_{pelatihan.judul_pelatihan.replace(' ', '_')}.pdf",
+        mimetype='application/pdf'
+    )
+
+@app.route('/trainer/<trainer_id>/cetak_sertifikat')
+def cetak_sertifikat_trainer_single(trainer_id):
+    template_path = 'static/templates/sertifikat_trainer.jpg'
+    if not os.path.exists(template_path):
+        template_path = 'static/templates/sertifikat_trainers.jpg'
+    if not os.path.exists(template_path):
+        template_path = 'static/templates/sertifikat_template.jpg'
+    if not os.path.exists(template_path):
+        template_path = None
+
+    if str(trainer_id).startswith('main_'):
+        p_id = int(str(trainer_id).replace('main_', ''))
+        pelatihan = Pelatihan.query.get_or_404(p_id)
+        pdf_buffer = generate_sertifikat_trainer_pdf(pelatihan, template_path, trainer_id='main')
+        safe_name = pelatihan.nama_instruktur.replace(' ', '_').replace('.', '')
+        peran_name = 'Trainer'
+    elif str(trainer_id).startswith('co_'):
+        p_id = int(str(trainer_id).replace('co_', ''))
+        pelatihan = Pelatihan.query.get_or_404(p_id)
+        pdf_buffer = generate_sertifikat_trainer_pdf(pelatihan, template_path, trainer_id='co')
+        safe_name = (pelatihan.nama_co_trainer or 'co_trainer').replace(' ', '_').replace('.', '')
+        peran_name = 'Co-Trainer'
+    elif str(trainer_id).startswith('asst_'):
+        p_id = int(str(trainer_id).replace('asst_', ''))
+        pelatihan = Pelatihan.query.get_or_404(p_id)
+        pdf_buffer = generate_sertifikat_trainer_pdf(pelatihan, template_path, trainer_id='asst')
+        safe_name = (pelatihan.nama_asisten_trainer or 'asisten').replace(' ', '_').replace('.', '')
+        peran_name = 'Asisten_Trainer'
+    else:
+        trainer_obj = Trainer.query.get_or_404(int(trainer_id))
+        pelatihan = Pelatihan.query.get(trainer_obj.pelatihan_id)
+        pdf_buffer = generate_sertifikat_trainer_pdf(pelatihan, template_path, trainer_id=trainer_obj.id)
+        safe_name = trainer_obj.nama.replace(' ', '_').replace('.', '')
+        peran_name = trainer_obj.peran.replace(' ', '_')
+
+    return send_file(
+        pdf_buffer,
+        as_attachment=True,
+        download_name=f"Sertifikat_{peran_name}_{safe_name}.pdf",
+        mimetype='application/pdf'
+    )
 
 @app.route('/pelatihan/<int:pelatihan_id>/cetak_sertifikat')
 def cetak_sertifikat(pelatihan_id):

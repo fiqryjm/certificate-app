@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% block title %}Kelola Trainer / Asisten - {{ pelatihan.judul_pelatihan }}{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <div>
+        <h1 class="page-title" style="margin-bottom: 0.25rem;">Kelola Trainer / Co-Trainer / Asisten</h1>
+        <p style="color: var(--text-muted); margin-top: 0.25rem;">{{ pelatihan.judul_pelatihan }}</p>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+        <a href="{{ url_for('peserta', pelatihan_id=pelatihan.id) }}" class="btn btn-secondary" style="border: 1px solid var(--border);">Ke Daftar Peserta</a>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Kembali</a>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+    <!-- Form Tambah Trainer -->
+    <div class="card">
+        <h3 style="margin-bottom: 1.5rem; font-weight: 600;">Tambah Pengajar / Asisten</h3>
+        <form method="POST">
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label class="form-label" for="nama" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Nama Lengkap & Gelar</label>
+                <input type="text" class="form-control" id="nama" name="nama" required placeholder="Contoh: Ir. Budi Santoso, M.T." style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label class="form-label" for="peran" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Peran</label>
+                <select class="form-control" id="peran" name="peran" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: white;">
+                    <option value="Trainer">Trainer (Sebagai Trainer)</option>
+                    <option value="Co-Trainer">Co-Trainer (Sebagai Co-Trainer)</option>
+                    <option value="Asisten Trainer">Asisten Trainer (Sebagai Asisten Trainer)</option>
+                </select>
+                <small style="color: var(--text-muted); font-size: 0.8rem; display: block; margin-top: 0.35rem;">
+                    Sertifikat akan tertulis otomatis "Sebagai [Peran]".
+                </small>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Tambah Pengajar</button>
+        </form>
+    </div>
+
+    <!-- Tabel Daftar Trainer -->
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.5rem;">
+            <h3 style="font-weight: 600; margin: 0;">Daftar Pengajar & Tim</h3>
+            <a href="{{ url_for('cetak_sertifikat_trainer', pelatihan_id=pelatihan.id) }}" class="btn btn-primary btn-sm" style="background: #10B981; box-shadow: none;">
+                📄 Cetak Semua Sertifikat Trainer (PDF)
+            </a>
+        </div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">No</th>
+                        <th>Nama Pengajar</th>
+                        <th>Peran</th>
+                        <th>Sumber Data</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {# 1. Trainer Utama dari Pelatihan #}
+                    {% set ns = namespace(count=1) %}
+                    {% if pelatihan.nama_instruktur %}
+                    <tr>
+                        <td style="width: 50px;">{{ ns.count }}</td>
+                        <td><strong>{{ pelatihan.nama_instruktur }}</strong></td>
+                        <td>
+                            <span class="badge" style="background: #D1FAE5; color: #065F46; padding: 0.25rem 0.6rem; border-radius: 9999px; font-weight: 600; font-size: 0.8rem;">Trainer</span>
+                        </td>
+                        <td><small style="color: var(--text-muted);">Form Pelatihan (Utama)</small></td>
+                        <td>
+                            <div style="display: flex; gap: 0.35rem; align-items: center;">
+                                <a href="{{ url_for('edit_pelatihan', pelatihan_id=pelatihan.id) }}" class="btn btn-secondary btn-sm" style="background: #6B7280; color: white; border: none; padding: 0.2rem 0.5rem; font-size: 0.8rem;">Edit</a>
+                                <a href="{{ url_for('cetak_sertifikat_trainer_single', trainer_id='main_' ~ pelatihan.id) }}" class="btn btn-primary btn-sm" style="background: #10B981; color: white; border: none; padding: 0.2rem 0.5rem; font-size: 0.8rem;">Cetak PDF</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% set ns.count = ns.count + 1 %}
+                    {% endif %}
+
+                    {# 2. Co-Trainer dari Pelatihan #}
+                    {% if pelatihan.nama_co_trainer %}
+                    <tr>
+                        <td style="width: 50px;">{{ ns.count }}</td>
+                        <td><strong>{{ pelatihan.nama_co_trainer }}</strong></td>
+                        <td>
+                            <span class="badge" style="background: #E0E7FF; color: #4338CA; padding: 0.25rem 0.6rem; border-radius: 9999px; font-weight: 600; font-size: 0.8rem;">Co-Trainer</span>
+                        </td>
+                        <td><small style="color: var(--text-muted);">Form Pelatihan</small></td>
+                        <td>
+                            <div style="display: flex; gap: 0.35rem; align-items: center;">
+                                <a href="{{ url_for('edit_pelatihan', pelatihan_id=pelatihan.id) }}" class="btn btn-secondary btn-sm" style="background: #6B7280; color: white; border: none; padding: 0.2rem 0.5rem; font-size: 0.8rem;">Edit</a>
+                                <a href="{{ url_for('cetak_sertifikat_trainer_single', trainer_id='co_' ~ pelatihan.id) }}" class="btn btn-primary btn-sm" style="background: #10B981; color: white; border: none; padding: 0.2rem 0.5rem; font-size: 0.8rem;">Cetak PDF</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% set ns.count = ns.count + 1 %}
+                    {% endif %}
+
+                    {# 3. Asisten Trainer dari Pelatihan #}
+                    {% if pelatihan.nama_asisten_trainer %}
+                    <tr>
+                        <td style="width: 50px;">{{ ns.count }}</td>
+                        <td><strong>{{ pelatihan.nama_asisten_trainer }}</strong></td>
+                        <td>
+                            <span class="badge" style="background: #FEF3C7; color: #92400E; padding: 0.25rem 0.6rem; border-radius: 9999px; font-weight: 600; font-size: 0.8rem;">Asisten Trainer</span>
+                        </td>
+                        <td><small style="color: var(--text-muted);">Form Pelatihan</small></td>
+                        <td>
+                            <div style="display: flex; gap: 0.35rem; align-items: center;">
+                                <a href="{{ url_for('edit_pelatihan', pelatihan_id=pelatihan.id) }}" class="btn btn-secondary btn-sm" style="background: #6B7280; color: white; border: none; padding: 0.2rem 0.5rem; font-size: 0.8rem;">Edit</a>
+                                <a href="{{ url_for('cetak_sertifikat_trainer_single', trainer_id='asst_' ~ pelatihan.id) }}" class="btn btn-primary btn-sm" style="background: #10B981; color: white; border: none; padding: 0.2rem 0.5rem; font-size: 0.8rem;">Cetak PDF</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% set ns.count = ns.count + 1 %}
+                    {% endif %}
+
+                    {# 4. Trainer Tambahan dari Database #}
+                    {% for t in trainer_list %}
+                    <tr>
+                        <td style="width: 50px;">{{ ns.count }}</td>
+                        <td><strong>{{ t.nama }}</strong></td>
+                        <td>
+                            {% if 'Co-' in t.peran %}
+                                <span class="badge" style="background: #E0E7FF; color: #4338CA; padding: 0.25rem 0.6rem; border-radius: 9999px; font-weight: 600; font-size: 0.8rem;">Co-Trainer</span>
+                            {% elif 'Asisten' in t.peran %}
+                                <span class="badge" style="background: #FEF3C7; color: #92400E; padding: 0.25rem 0.6rem; border-radius: 9999px; font-weight: 600; font-size: 0.8rem;">Asisten Trainer</span>
+                            {% else %}
+                                <span class="badge" style="background: #D1FAE5; color: #065F46; padding: 0.25rem 0.6rem; border-radius: 9999px; font-weight: 600; font-size: 0.8rem;">Trainer</span>
+                            {% endif %}
+                        </td>
+                        <td><small style="color: var(--text-muted);">Tambahan</small></td>
+                        <td>
+                            <div style="display: flex; gap: 0.35rem; align-items: center;">
+                                <a href="{{ url_for('edit_trainer', trainer_id=t.id) }}" class="btn btn-secondary btn-sm" style="background: #F59E0B; color: white; border: none; padding: 0.2rem 0.5rem; font-size: 0.8rem;">Edit</a>
+                                <form method="POST" action="{{ url_for('hapus_trainer', trainer_id=t.id) }}" style="display: inline; margin: 0;" onsubmit="return confirm('Hapus data pengajar ini?');">
+                                    <button type="submit" class="btn btn-secondary btn-sm" style="background: #EF4444; color: white; border: none; padding: 0.2rem 0.5rem; font-size: 0.8rem; cursor: pointer;">Hapus</button>
+                                </form>
+                                <a href="{{ url_for('cetak_sertifikat_trainer_single', trainer_id=t.id) }}" class="btn btn-primary btn-sm" style="background: #10B981; color: white; border: none; padding: 0.2rem 0.5rem; font-size: 0.8rem;">Cetak PDF</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% set ns.count = ns.count + 1 %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
